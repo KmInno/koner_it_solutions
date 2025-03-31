@@ -191,7 +191,11 @@
                         "items": {
                             "type": "string"
                         },
-                        "example": ["Alice", "Bob", "Charlie"]
+                        "example": [
+                            "Alice",
+                            "Bob",
+                            "Charlie"
+                        ]
                     },
                     "image_url": {
                         "type": "string",

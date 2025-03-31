@@ -1,0 +1,31 @@
+<body>
+    <% if (messages.error && messages.error.length > 0) { %>
+        <ul class="notice">
+            <% messages.error.forEach(msg => { %>
+                <li><%= msg %></li>
+            <% }) %>
+        </ul>
+    <% } %>
+    <% if (messages.success && messages.success.length > 0) { %>
+        <ul class="success">
+            <% messages.success.forEach(msg => { %>
+                <li><%= msg %></li>
+            <% }) %>
+        </ul>
+    <% } %>
+    <h1>Login</h1>
+    <form action="/auth/login" method="POST">
+        <div>
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+        </div>
+        <div>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        </div>
+        <div>
+            <button type="submit">Login</button>
+        </div>
+    </form>
+    <p>Don't have an account? <a href="/auth/register">Register here</a></p>
+</body>

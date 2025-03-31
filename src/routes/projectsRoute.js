@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const projectsController = require('../controllers/projectsCont');
+const authenticateToken = require("../middleware/authMiddleware");
 const { validateProject } = require('./validation');
+
+// Apply the authenticateToken middleware to all routes in this router
+router.use(authenticateToken);
 
 // Specific routes first
 router.get("/add", projectsController.projectsForm);

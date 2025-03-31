@@ -1,32 +1,62 @@
-const { get } = require("../routes/static");
-
 const dotenv = require("dotenv").config();
 const MongoClient = require("mongodb").MongoClient;
 
-let db;
+let dbMain; // For MONGO_URL
+let dbUsers; // For MONGO_USERS_URL
 
-const initDB = (callback) => {
-    if (db) {
-        console.warn("Db is already initialised!");
-        return callback(null, db);
+// Initialize the main database
+const initMainDB = (callback) => {
+    if (dbMain) {
+        console.warn("Main DB is already initialized!");
+        return callback(null, dbMain);
     }
     MongoClient.connect(process.env.MONGO_URL)
         .then((client) => {
-            db = client.db();
-            callback(null, db);
+            dbMain = client.db();
+            console.log("Main DB initialized successfully.");
+            callback(null, dbMain);
         })
         .catch((err) => {
             callback(err);
         });
 };
 
-const getDB = () => {
-    if (!db) {
-        throw Error("Db has not been initialised. Please call initDB first.");
+// Initialize the users database
+const initUsersDB = (callback) => {
+    if (dbUsers) {
+        console.warn("Users DB is already initialized!");
+        return callback(null, dbUsers);
     }
-    return db;
+    MongoClient.connect(process.env.MONGO_USERS_URL)
+        .then((client) => {
+            dbUsers = client.db();
+            console.log("Users DB initialized successfully.");
+            callback(null, dbUsers);
+        })
+        .catch((err) => {
+            callback(err);
+        });
+};
+
+// Get the main database instance
+const getMainDB = () => {
+    if (!dbMain) {
+        throw Error("Main DB has not been initialized. Please call initMainDB first.");
+    }
+    return dbMain;
+};
+
+// Get the users database instance
+const getUsersDB = () => {
+    if (!dbUsers) {
+        throw Error("Users DB has not been initialized. Please call initUsersDB first.");
+    }
+    return dbUsers;
 };
 
 module.exports = {
-    initDB, getDB
+    initMainDB,
+    initUsersDB,
+    getMainDB,
+    getUsersDB
 };
