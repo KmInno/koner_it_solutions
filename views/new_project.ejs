@@ -1,0 +1,41 @@
+
+<body>
+    <h1>Create New Project</h1>
+    <form action="/projects/" method="POST">
+        <div>
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" value="Website Redesign" required>
+        </div>
+        <div>
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" required>Revamp the company website to improve user experience and update branding.</textarea>
+        </div>
+        <div>
+            <label for="status">Status:</label>
+            <select id="status" name="status" required>
+                <option value="In Progress" selected>In Progress</option>
+                <option value="Not Started">Not Started</option>
+                <option value="Completed">Completed</option>
+            </select>
+        </div>
+        <div>
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" value="2025-03-01" required>
+        </div>
+        <div>
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" value="2025-06-01" required>
+        </div>
+        <div>
+            <label for="team_members">Team Members (comma-separated):</label>
+            <input type="text" id="team_members" name="team_members" value="Alice, Bob, Charlie" required>
+        </div>
+        <div>
+            <label for="image_url">Image URL:</label>
+            <input type="url" id="image_url" name="image_url" value="https://example.com/website-redesign.jpg" required>
+        </div>
+        <div>
+            <button type="submit">Create Project</button>
+        </div>
+    </form>
+</body>
