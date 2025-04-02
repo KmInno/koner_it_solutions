@@ -2,7 +2,7 @@ const mongodb = require('../config/mongodb');
 
 async function getPorjects() {
     try {
-        const db = await mongodb.getMainDB();
+        const db = await mongodb.getProjectsDB();
         return db.collection('projects');
     } catch (error) {
         console.error('Error fetching projects:', error);

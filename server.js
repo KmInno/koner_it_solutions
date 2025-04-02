@@ -15,11 +15,10 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 const bodyParser = require('body-parser');
 const session = require('express-session');
-
-
+const MongoStore = require('connect-mongo');
 
 /* ********************
-local host information
+Local host information
 ******************** */
 const PORT = process.env.PORT || 10001; // Fallback to 10001 if PORT is not set
 const HOST = process.env.HOST || '0.0.0.0'; // Fallback to '0.0.0.0' if HOST is not set
@@ -28,14 +27,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
 
-
-// middleware for parsing cookies
+// Session configuration
 app.use(
     session({
-        secret: 'env.parsed.ACCESS_TOKEN_SECRET', 
+        secret: process.env.ACCESS_TOKEN_SECRET_2 || 'your_secret_key',
         resave: false,
         saveUninitialized: true,
-        cookie: { secure: false } 
+        store: MongoStore.create({
+            mongoUrl: process.env.MONGO_USERS_URL, // Ensure it's the correct DB URL
+            dbName: 'sessions', // Optional: Specify a database name for sessions
+            collectionName: 'sessions', // Optional: Specify a collection name for sessions
+        }),
+        cookie: { secure: process.env.NODE_ENV === 'production' }, // Secure cookies in production
     })
 );
 
@@ -45,10 +48,6 @@ app.use((req, res, next) => {
     next();
 });
 app.use(cookieParser());
-
-
-
-
 
 app.set('view engine', 'ejs');
 app.use(expressLayouts);
@@ -60,50 +59,22 @@ app.use('/', baseRoute);
 app.use('/projects', projectsRoute);
 app.use('/auth', accountsRoute);
 
-// swagger
+// Swagger API Documentation
 app.use('/swagger', authenticateToken, swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 /* *******************
-connecting the MongoDB server
+Connecting the MongoDB databases
 ******************** */
-// mongodb.initUsersDB(function (err) {
-//     if (err) {
-//         console.log(err);
-//     } else {
-//         app.listen(PORT, HOST, () => {
-//             console.log(`Server running at http://${HOST}:${PORT}/`);
-//         });
-//     }
-// });
+mongodb.initDatabases((err, dbs) => {
+    if (err) {
+        console.log("Error initializing databases:", err);
+        process.exit(1); // Exit the app if database connection fails
+    } else {
+        console.log("Databases initialized successfully:", Object.keys(dbs));
 
-const initMainDBPromise = new Promise((resolve, reject) => {
-    mongodb.initMainDB((err) => {
-        if (err) {
-            reject("Error initializing Main DB: " + err);
-        } else {
-            resolve("Main DB initialized successfully");
-        }
-    });
-});
-
-const initUsersDBPromise = new Promise((resolve, reject) => {
-    mongodb.initUsersDB((err) => {
-        if (err) {
-            reject("Error initializing Users DB: " + err);
-        } else {
-            resolve("Users DB initialized successfully");
-        }
-    });
-});
-
-Promise.all([initMainDBPromise, initUsersDBPromise])
-    .then((messages) => {
-        messages.forEach((msg) => console.log(msg));
+        // Start the server only after databases are initialized
         app.listen(PORT, HOST, () => {
             console.log(`Server running at http://${HOST}:${PORT}/`);
         });
-    })
-    .catch((error) => {
-        console.log("Initialization error:", error);
-    });
-
+    }
+});

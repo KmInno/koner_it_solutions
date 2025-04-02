@@ -1,25 +1,8 @@
 const dotenv = require("dotenv").config();
 const MongoClient = require("mongodb").MongoClient;
 
-let dbMain; // For MONGO_URL
-let dbUsers; // For MONGO_USERS_URL
-
-// Initialize the main database
-const initMainDB = (callback) => {
-    if (dbMain) {
-        console.warn("Main DB is already initialized!");
-        return callback(null, dbMain);
-    }
-    MongoClient.connect(process.env.MONGO_URL)
-        .then((client) => {
-            dbMain = client.db();
-            console.log("Main DB initialized successfully.");
-            callback(null, dbMain);
-        })
-        .catch((err) => {
-            callback(err);
-        });
-};
+let dbUsers = null;
+let dbProjects = null;
 
 // Initialize the users database
 const initUsersDB = (callback) => {
@@ -29,7 +12,7 @@ const initUsersDB = (callback) => {
     }
     MongoClient.connect(process.env.MONGO_USERS_URL)
         .then((client) => {
-            dbUsers = client.db();
+            dbUsers = client.db("usersdb"); // Explicitly select the usersdb
             console.log("Users DB initialized successfully.");
             callback(null, dbUsers);
         })
@@ -38,12 +21,37 @@ const initUsersDB = (callback) => {
         });
 };
 
-// Get the main database instance
-const getMainDB = () => {
-    if (!dbMain) {
-        throw Error("Main DB has not been initialized. Please call initMainDB first.");
+
+// Initialize the projects database
+const initProjectsDB = (callback) => {
+    if (dbProjects) {
+        console.warn("Projects DB is already initialized!");
+        return callback(null, dbProjects);
     }
-    return dbMain;
+    MongoClient.connect(process.env.MONGO_PROJECTS_URL)
+        .then((client) => {
+            dbProjects = client.db("projectsdb"); // Explicitly select the projectsdb
+            console.log("Projects DB initialized successfully.");
+            callback(null, dbProjects);
+        })
+        .catch((err) => {
+            callback(err);
+        });
+};
+
+
+// Initialize both databases
+const initDatabases = (callback) => {
+    initUsersDB((errUsers, usersDB) => {
+        if (errUsers) return callback(errUsers);
+
+        initProjectsDB((errProjects, projectsDB) => {
+            if (errProjects) return callback(errProjects);
+
+            console.log("Both databases initialized successfully.");
+            callback(null, { usersDB, projectsDB });
+        });
+    });
 };
 
 // Get the users database instance
@@ -54,9 +62,18 @@ const getUsersDB = () => {
     return dbUsers;
 };
 
+// Get the projects database instance
+const getProjectsDB = () => {
+    if (!dbProjects) {
+        throw Error("Projects DB has not been initialized. Please call initProjectsDB first.");
+    }
+    return dbProjects;
+};
+
 module.exports = {
-    initMainDB,
     initUsersDB,
-    getMainDB,
-    getUsersDB
+    initProjectsDB,
+    initDatabases,
+    getUsersDB,
+    getProjectsDB,
 };
